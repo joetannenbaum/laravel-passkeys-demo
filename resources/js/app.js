@@ -7,7 +7,7 @@ import './bootstrap';
 
 document.addEventListener('alpine:init', () => {
     Alpine.data('authForm', () => ({
-        mode: 'register',
+        mode: 'login',
         username: '',
         name: '',
         browserSupported: browserSupportsWebAuthn(),
@@ -15,11 +15,11 @@ document.addEventListener('alpine:init', () => {
         submit() {
             this.error = null;
 
-            if (this.mode === 'register') {
-                return this.submitRegister();
+            if (this.mode === 'login') {
+                return this.submitLogin();
             }
 
-            return this.submitLogin();
+            return this.submitRegister();
         },
         submitRegister() {
             window.axios
@@ -58,6 +58,14 @@ document.addEventListener('alpine:init', () => {
                         'Something went wrong verifying the authentication.';
                 })
                 .catch((error) => {
+                    const errorMessage =
+                        error?.response?.data?.message || error;
+
+                    if (errorMessage === 'User not found') {
+                        this.mode = 'confirmRegistration';
+                        return;
+                    }
+
                     this.error = error?.response?.data?.message || error;
                 });
         },

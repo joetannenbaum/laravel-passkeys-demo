@@ -31,10 +31,9 @@
     <div x-show="browserSupported" class="px-4 py-8 bg-white shadow sm:rounded-lg sm:px-10">
         <form class="space-y-6" @submit.prevent="submit">
             <h2 class="text-xl font-bold text-center">
-                <span x-show="mode === 'register'">Register</span>
-                <span x-show="mode === 'login'">Sign In</span>
+                Sign In or Register
             </h2>
-            <div>
+            <div x-show="mode === 'login'">
                 <label for="email" class="block text-sm font-medium text-gray-700">Username</label>
                 <div class="relative mt-1 rounded-md shadow-sm">
                     <input x-model="username" type="text" id="username" v-model="username" required
@@ -52,26 +51,17 @@
                 <p class="mt-2 text-sm text-red-600 " x-show=" error" x-text="error"></p>
             </div>
 
-            <div class="text-sm text-center" x-show="mode === 'register'">
-                Already have an account?
-                <a href="#" @click.prevent="mode = 'login'; error = null"
-                    class="font-medium text-sky-600 hover:text-sky-500">
-                    Sign in.
-                </a>
-            </div>
-
-            <div class="text-sm text-center" x-show="mode === 'login'">
-                No account?
-                <a href="#" @click.prevent="mode = 'register'; error = null"
-                    class="font-medium text-sky-600 hover:text-sky-500">
-                    Register now.
-                </a>
+            <div x-show="mode === 'confirmRegistration'" class="space-y-2">
+                <p>No account exists for "<span x-text="username"></span>". Do you want to create a new account?</p>
+                <p class="text-sm text-center">
+                    <a href="#" @click.prevent="mode = 'login'" class="underline">Cancel</a>
+                </p>
             </div>
 
             <div>
                 <button type="submit"
                     class="flex justify-center w-full px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
-                    x-text="mode === 'register' ? 'Register' : 'Sign In'">
+                    x-text="mode === 'confirmRegistration' ? 'Register' : 'Continue'">
                 </button>
             </div>
         </form>
