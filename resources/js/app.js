@@ -26,21 +26,18 @@ document.addEventListener('alpine:init', () => {
                 .post('/registration/options', {
                     username: this.username,
                 })
-                // Pass the options to the authenticator and wait for a response
                 .then((response) => startRegistration(response.data))
                 .then((attResp) => axios.post('/registration/verify', attResp))
                 .then((verificationResponse) => {
-                    if (
-                        verificationResponse.data &&
-                        verificationResponse.data.verified
-                    ) {
-                        console.log('success!');
-                    } else {
-                        console.log('invalid?', verificationResponse.data);
+                    if (verificationResponse.data?.verified) {
+                        return window.location.reload();
                     }
+
+                    this.error =
+                        'Something went wrong verifying the registration.';
                 })
                 .catch((error) => {
-                    this.error = error;
+                    this.error = error?.response?.data?.message || error;
                 });
         },
         submitLogin() {
@@ -48,23 +45,20 @@ document.addEventListener('alpine:init', () => {
                 .post('/authentication/options', {
                     username: this.username,
                 })
-                // Pass the options to the authenticator and wait for a response
                 .then((response) => startAuthentication(response.data))
                 .then((attResp) =>
                     axios.post('/authentication/verify', attResp),
                 )
                 .then((verificationResponse) => {
-                    if (
-                        verificationResponse.data &&
-                        verificationResponse.data.verified
-                    ) {
-                        console.log('success!');
-                    } else {
-                        console.log('invalid?', verificationResponse.data);
+                    if (verificationResponse.data?.verified) {
+                        return window.location.reload();
                     }
+
+                    this.error =
+                        'Something went wrong verifying the authentication.';
                 })
                 .catch((error) => {
-                    this.error = error;
+                    this.error = error?.response?.data?.message || error;
                 });
         },
     }));

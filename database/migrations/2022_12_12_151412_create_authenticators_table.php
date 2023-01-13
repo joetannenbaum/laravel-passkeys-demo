@@ -18,11 +18,6 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->text('credential_id');
             $table->text('public_key');
-            // $table->binary('public_key');
-            // $table->unsignedBigInteger('counter');
-            // $table->string('device_type');
-            // $table->boolean('backed_up');
-            // $table->string('transports');
             $table->timestamps();
         });
     }

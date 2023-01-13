@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Auth\CredentialSourceRepository;
 use App\Models\User;
 use Cose\Algorithms;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Psr\Http\Message\ServerRequestInterface;
 use Webauthn\AttestationStatement\AttestationObjectLoader;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
@@ -24,6 +27,8 @@ use Webauthn\TokenBinding\IgnoreTokenBindingHandler;
 
 class RegistrationController extends Controller
 {
+    const CREDENTIAL_CREATION_OPTIONS_SESSION_KEY = 'publicKeyCredentialCreationOptions';
+
     public function generateOptions(Request $request)
     {
         $rpEntity = PublicKeyCredentialRpEntity::create(
@@ -33,19 +38,17 @@ class RegistrationController extends Controller
         );
 
         $user = User::firstOrNew([
-            'email' => $request->input('username'),
+            'username' => $request->input('username'),
         ]);
 
         if (!$user->exists) {
-            $user->name = $request->input('username');
-            $user->password = Str::random(32);
             $user->save();
         }
 
         $userEntity = PublicKeyCredentialUserEntity::create(
-            $user->email,
+            $user->username,
             $user->id,
-            $user->name,
+            $user->username,
             null,
         );
 
@@ -94,7 +97,10 @@ class RegistrationController extends Controller
             $serializedPublicKeyCredentialCreationOptions['excludeCredentials'] = [];
         }
 
-        $request->session()->put('publicKeyCredentialCreationOptions', $serializedPublicKeyCredentialCreationOptions);
+        $request->session()->put(
+            self::CREDENTIAL_CREATION_OPTIONS_SESSION_KEY,
+            $serializedPublicKeyCredentialCreationOptions
+        );
 
         return $serializedPublicKeyCredentialCreationOptions;
     }
@@ -130,17 +136,34 @@ class RegistrationController extends Controller
         $authenticatorAttestationResponse = $publicKeyCredential->getResponse();
 
         if (!$authenticatorAttestationResponse instanceof AuthenticatorAttestationResponse) {
-            abort(403, 'Invalid response type');
+            throw ValidationException::withMessages([
+                'username' => 'Invalid response type',
+            ]);
         }
 
         $publicKeyCredentialSource = $authenticatorAttestationResponseValidator->check(
             $authenticatorAttestationResponse,
-            PublicKeyCredentialCreationOptions::createFromArray(session('publicKeyCredentialCreationOptions')),
+            PublicKeyCredentialCreationOptions::createFromArray(
+                session(self::CREDENTIAL_CREATION_OPTIONS_SESSION_KEY)
+            ),
             $serverRequest
         );
 
-        $request->session()->forget('publicKeyCredentialCreationOptions');
+        $request->session()->forget(self::CREDENTIAL_CREATION_OPTIONS_SESSION_KEY);
 
-        $publicKeyCredentialSourceRepository->saveCredentialSource($publicKeyCredentialSource);
+        try {
+            $publicKeyCredentialSourceRepository->saveCredentialSource($publicKeyCredentialSource);
+            $user = User::where('id', $publicKeyCredentialSource->getUserHandle())->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            throw ValidationException::withMessages([
+                'username' => 'User not found',
+            ]);
+        }
+
+        Auth::login($user);
+
+        return [
+            'verified' => true,
+        ];
     }
 }

@@ -17,7 +17,10 @@ use Cose\Algorithm\Signature\RSA\PS512;
 use Cose\Algorithm\Signature\RSA\RS256;
 use Cose\Algorithm\Signature\RSA\RS384;
 use Cose\Algorithm\Signature\RSA\RS512;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Psr\Http\Message\ServerRequestInterface;
 use Webauthn\AttestationStatement\AttestationObjectLoader;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
@@ -36,12 +39,18 @@ class AuthenticationController extends Controller
 {
     public function generateOptions(Request $request)
     {
-        $user = User::where('email', $request->input('username'))->firstOrFail();
+        try {
+            $user = User::where('username', $request->input('username'))->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            throw ValidationException::withMessages([
+                'username' => 'User not found',
+            ]);
+        }
 
         $userEntity = PublicKeyCredentialUserEntity::create(
-            $user->email,
+            $user->username,
             (string) $user->id,
-            $user->name,
+            $user->username,
             null,
         );
 
@@ -117,7 +126,9 @@ class AuthenticationController extends Controller
         $authenticatorAssertionResponse = $publicKeyCredential->getResponse();
 
         if (!$authenticatorAssertionResponse instanceof AuthenticatorAssertionResponse) {
-            abort(403, 'Invalid response type');
+            throw ValidationException::withMessages([
+                'username' => 'Invalid response type',
+            ]);
         }
 
         $publicKeyCredentialSource = $authenticatorAttestationResponseValidator->check(
@@ -130,6 +141,12 @@ class AuthenticationController extends Controller
 
         $request->session()->forget('publicKeyCredentialRequestOptions');
 
-        ray('log user in now!!!!');
+        $user = User::where('id', $publicKeyCredentialSource->getUserHandle())->firstOrFail();
+
+        Auth::login($user);
+
+        return [
+            'verified' => true,
+        ];
     }
 }
