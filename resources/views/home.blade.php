@@ -30,6 +30,10 @@
 
     <div x-show="browserSupported" class="px-4 py-8 bg-white shadow sm:rounded-lg sm:px-10">
         <form class="space-y-6" @submit.prevent="submit">
+            <h2 class="text-xl font-bold text-center">
+                <span x-show="mode === 'register'">Register</span>
+                <span x-show="mode === 'login'">Sign In</span>
+            </h2>
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700">Username</label>
                 <div class="relative mt-1 rounded-md shadow-sm">
