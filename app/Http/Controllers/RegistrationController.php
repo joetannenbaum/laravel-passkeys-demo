@@ -111,7 +111,7 @@ class RegistrationController extends Controller
 
         $serializedOptions['extensions'] = $serializedOptions['extensions']->jsonSerialize();
 
-        // $serializedOptions['authenticatorSelection']['residentKey'] = AuthenticatorSelectionCriteria::RESIDENT_KEY_REQUIREMENT_PREFERRED;
+        $serializedOptions['authenticatorSelection']['residentKey'] = AuthenticatorSelectionCriteria::RESIDENT_KEY_REQUIREMENT_PREFERRED;
 
         // ray($serializedOptions);
 
