@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+// Holy imports, Batman
 use App\Auth\CredentialSourceRepository;
 use App\Models\User;
 use Cose\Algorithm\Manager;
@@ -37,6 +38,9 @@ use Webauthn\TokenBinding\IgnoreTokenBindingHandler;
 
 class AuthenticationController extends Controller
 {
+    // We use this key across several methods, so we're going to define it here
+    const CREDENTIAL_REQUEST_OPTIONS_SESSION_KEY = 'publicKeyCredentialRequestOptions';
+
     public function generateOptions(Request $request)
     {
         try {
@@ -47,6 +51,7 @@ class AuthenticationController extends Controller
             ]);
         }
 
+        // User Entity
         $userEntity = PublicKeyCredentialUserEntity::create(
             $user->username,
             (string) $user->id,
@@ -54,42 +59,49 @@ class AuthenticationController extends Controller
             null,
         );
 
-        $publicKeyCredentialSourceRepository = new CredentialSourceRepository();
+        // A repo of our public key credentials
+        $pkSourceRepo = new CredentialSourceRepository();
 
-        $registeredAuthenticators = $publicKeyCredentialSourceRepository->findAllForUserEntity($userEntity);
+        // A user can have multiple authenticators, so we need to get all of them to check against
+        $registeredAuthenticators = $pkSourceRepo->findAllForUserEntity($userEntity);
 
         // We don’t need the Credential Sources, just the associated Descriptors
         $allowedCredentials = collect($registeredAuthenticators)
             ->pluck('public_key')
-            ->map(fn ($publicKey) => PublicKeyCredentialSource::createFromArray($publicKey))
+            ->map(
+                fn ($publicKey) => PublicKeyCredentialSource::createFromArray($publicKey)
+            )
             ->map(
                 fn (PublicKeyCredentialSource $credential): PublicKeyCredentialDescriptor => $credential->getPublicKeyCredentialDescriptor()
             )
             ->toArray();
 
-        $publicKeyCredentialRequestOptions =
+        $pkRequestOptions =
             PublicKeyCredentialRequestOptions::create(
                 random_bytes(32) // Challenge
             )
+            // Tell the device which authenticators we are allowed to use
             ->allowCredentials(...$allowedCredentials);
 
-        $serializedPublicKeyCredentialRequestOptions = $publicKeyCredentialRequestOptions->jsonSerialize();
+        $serializedOptions = $pkRequestOptions->jsonSerialize();
 
-        $request->session()->put('publicKeyCredentialRequestOptions', $serializedPublicKeyCredentialRequestOptions);
+        // It is important to store the the options object in the session
+        // for the next step. The data will be needed to check the response from the device.
+        $request->session()->put(
+            self::CREDENTIAL_REQUEST_OPTIONS_SESSION_KEY,
+            $serializedOptions
+        );
 
-        return $serializedPublicKeyCredentialRequestOptions;
+        return $serializedOptions;
     }
 
     public function verify(Request $request, ServerRequestInterface $serverRequest)
     {
-        $publicKeyCredentialSourceRepository = new CredentialSourceRepository();
-        $tokenBindingHandler = IgnoreTokenBindingHandler::create();
+        // A repo of our public key credentials
+        $pkSourceRepo = new CredentialSourceRepository();
 
-        $attestationStatementSupportManager = AttestationStatementSupportManager::create();
-
-        $attestationStatementSupportManager->add(NoneAttestationStatementSupport::create());
-
-        $extensionOutputCheckerHandler = ExtensionOutputCheckerHandler::create();
+        $attestationManager = AttestationStatementSupportManager::create();
+        $attestationManager->add(NoneAttestationStatementSupport::create());
 
         $algorithmManager = Manager::create()->add(
             ES256::create(),
@@ -106,22 +118,20 @@ class AuthenticationController extends Controller
             Ed512::create(),
         );
 
-        $authenticatorAttestationResponseValidator = AuthenticatorAssertionResponseValidator::create(
-            $publicKeyCredentialSourceRepository,
-            $tokenBindingHandler,
-            $extensionOutputCheckerHandler,
+        // The validator that will check the response from the device
+        $responseValidator = AuthenticatorAssertionResponseValidator::create(
+            $pkSourceRepo,
+            IgnoreTokenBindingHandler::create(),
+            ExtensionOutputCheckerHandler::create(),
             $algorithmManager,
         );
 
-        $attestationObjectLoader = AttestationObjectLoader::create(
-            $attestationStatementSupportManager
+        // A loader that will load the response from the device
+        $pkCredentialLoader = PublicKeyCredentialLoader::create(
+            AttestationObjectLoader::create($attestationManager)
         );
 
-        $publicKeyCredentialLoader = PublicKeyCredentialLoader::create(
-            $attestationObjectLoader
-        );
-
-        $publicKeyCredential = $publicKeyCredentialLoader->load(json_encode($request->all()));
+        $publicKeyCredential = $pkCredentialLoader->load(json_encode($request->all()));
 
         $authenticatorAssertionResponse = $publicKeyCredential->getResponse();
 
@@ -131,15 +141,25 @@ class AuthenticationController extends Controller
             ]);
         }
 
-        $publicKeyCredentialSource = $authenticatorAttestationResponseValidator->check(
+        // Check the response from the device, this will
+        // throw an exception if the response is invalid.
+        // For the purposes of this demo, we are letting
+        // the exception bubble up so we can see what is
+        // going on.
+        $publicKeyCredentialSource = $responseValidator->check(
             $publicKeyCredential->getRawId(),
             $authenticatorAssertionResponse,
-            PublicKeyCredentialRequestOptions::createFromArray(session('publicKeyCredentialRequestOptions')),
+            PublicKeyCredentialRequestOptions::createFromArray(
+                session(self::CREDENTIAL_REQUEST_OPTIONS_SESSION_KEY)
+            ),
             $serverRequest,
             $authenticatorAssertionResponse->getUserHandle(),
         );
 
-        $request->session()->forget('publicKeyCredentialRequestOptions');
+        // If we've gotten this far, the response is valid!
+
+        // We don't need the options anymore, so let's remove them from the session
+        $request->session()->forget(self::CREDENTIAL_REQUEST_OPTIONS_SESSION_KEY);
 
         $user = User::where('username', $publicKeyCredentialSource->getUserHandle())->firstOrFail();
 
