@@ -51,8 +51,9 @@
                 <p class="mt-2 text-sm text-red-600 " x-show=" error" x-text="error"></p>
             </div>
 
-            <div x-show="mode === 'confirmRegistration'" class="space-y-2">
-                <p>No account exists for "<span x-text="username"></span>". Do you want to create a new account?</p>
+            <div x-show="mode === 'confirmRegistration'" class="space-y-2 text-center">
+                <p>No account exists for "<span x-text="username"></span>".
+                <p>Do you want to create a new account?</p>
                 <p class="text-sm text-center">
                     <a href="#" @click.prevent="mode = 'login'" class="underline">Cancel</a>
                 </p>

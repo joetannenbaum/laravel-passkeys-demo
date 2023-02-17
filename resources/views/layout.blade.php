@@ -19,7 +19,7 @@
 </head>
 
 <body class="h-full">
-    <div class="flex flex-col justify-center min-h-full px-4 py-12 sm:px-6 lg:px-8">
+    <div class="relative flex flex-col justify-center min-h-full px-4 py-12 sm:px-6 lg:px-8">
         <div class="sm:mx-auto sm:w-full sm:max-w-md">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="w-auto h-12 mx-auto">
@@ -28,11 +28,22 @@
             </svg>
             <h2 class="mt-6 text-3xl font-bold tracking-tight text-center text-gray-900">Laravel Passkeys Demo</h2>
             <p class="mt-2 text-sm text-center text-gray-600">
-                Something here, probably a link to the post and a note that the database deletes info every 30 minutes
+                This is a demo of how to authenticate users in your Laravel app using a passkey. This data is deleted
+                every 30 minutes.
+            </p>
+            <p class="mt-2 text-sm text-center text-gray-600">
+                <a href="https://blog.joe.codes/implementing-passkey-authentication-in-your-laravel-app"
+                    class="underline text-sky-600" target="_blank">Read the blog post</a> | <a
+                    href="https://github.com/joetannenbaum/laravel-passkeys-demo" class="underline text-sky-600"
+                    target="_blank">View the code</a>
             </p>
         </div>
 
         @yield('content')
+
+        <div class="absolute bottom-0 left-0 right-0 pb-4 mt-auto text-sm text-center text-gray-500">
+            <p>Launched with <a class="underline" target="_blank" href="https://bellows.dev">Bellows</a></p>
+        </div>
     </div>
 </body>
 
