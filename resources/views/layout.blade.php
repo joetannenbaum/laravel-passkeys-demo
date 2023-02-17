@@ -9,6 +9,8 @@
 
     <link href="https://fonts.bunny.net/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
