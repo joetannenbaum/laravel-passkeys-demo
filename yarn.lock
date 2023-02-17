@@ -73,10 +73,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@simplewebauthn/browser@npm:^6.2.2":
-  version: 6.2.2
-  resolution: "@simplewebauthn/browser@npm:6.2.2"
-  checksum: 896de5ff32cf2f5bf3f1fe35da83755a07affc66be94c888ab47360f9850b1ac8c8a60efe3c780a3747942e9f4f41728401c8bda3bfa47e4f90120c85f4f9b65
+"@simplewebauthn/browser@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@simplewebauthn/browser@npm:7.0.0"
+  checksum: eb8d7e2d923649c116275cc9bfbabfa27a180cd33dbf9d6a28c7aa9460ea79cd25204c9a7d76ed8cc24764da4a09b5939209aa30e9b295b9d54e497bb9b652a4
   languageName: node
   linkType: hard
 
@@ -1718,7 +1718,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@simplewebauthn/browser": ^6.2.2
+    "@simplewebauthn/browser": ^7.0.0
     "@tailwindcss/forms": ^0.5.3
     "@tailwindcss/typography": ^0.5.8
     autoprefixer: ^10.4.13
