@@ -36,7 +36,8 @@
             <div x-show="mode === 'login'">
                 <label for="email" class="block text-sm font-medium text-gray-700">Username</label>
                 <div class="relative mt-1 rounded-md shadow-sm">
-                    <input x-model="username" type="text" id="username" v-model="username" required
+                    <input x-model="username" type="text" id="username" v-model="username" autocomplete="username"
+                        required autocapitalize="off"
                         class="block w-full px-3 py-2 placeholder-gray-400 border rounded-md appearance-none focus:outline-none sm:text-sm"
                         :class="error ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-sky-500 focus:ring-sky-500'" />
                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none" x-show="error">
