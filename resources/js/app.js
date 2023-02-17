@@ -85,6 +85,8 @@ document.addEventListener('alpine:init', () => {
                 });
         },
         trackEvent(eventId) {
+            console.log(eventId);
+            console.log('fathom', fathom);
             if (typeof fathom === 'undefined') {
                 return;
             }
