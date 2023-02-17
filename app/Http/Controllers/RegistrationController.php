@@ -87,7 +87,9 @@ class RegistrationController extends Controller
             ->setAttestation(
                 PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE
             )
-            ->setAuthenticatorSelection(AuthenticatorSelectionCriteria::create())
+            ->setAuthenticatorSelection(
+                AuthenticatorSelectionCriteria::create()
+            )
             ->setExtensions(AuthenticationExtensionsClientInputs::createFromArray([
                 'credProps' => true,
             ]))
@@ -100,19 +102,25 @@ class RegistrationController extends Controller
                 )->toArray()
             );
 
-        $serializedPublicKeyCredentialCreationOptions = $publicKeyCredentialCreationOptions->jsonSerialize();
+        $serializedOptions = $publicKeyCredentialCreationOptions->jsonSerialize();
 
-        if (!isset($serializedPublicKeyCredentialCreationOptions['excludeCredentials'])) {
+        if (!isset($serializedOptions['excludeCredentials'])) {
             // The JS side needs this, so let's set it up for success with an empty array
-            $serializedPublicKeyCredentialCreationOptions['excludeCredentials'] = [];
+            $serializedOptions['excludeCredentials'] = [];
         }
+
+        $serializedOptions['extensions'] = $serializedOptions['extensions']->jsonSerialize();
+
+        // $serializedOptions['authenticatorSelection']['residentKey'] = AuthenticatorSelectionCriteria::RESIDENT_KEY_REQUIREMENT_PREFERRED;
+
+        // ray($serializedOptions);
 
         $request->session()->put(
             self::CREDENTIAL_CREATION_OPTIONS_SESSION_KEY,
-            $serializedPublicKeyCredentialCreationOptions
+            $serializedOptions
         );
 
-        return $serializedPublicKeyCredentialCreationOptions;
+        return $serializedOptions;
     }
 
     public function verify(Request $request, ServerRequestInterface $serverRequest)

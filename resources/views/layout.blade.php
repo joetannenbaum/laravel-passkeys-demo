@@ -18,6 +18,14 @@
     <script src="https://cdn.usefathom.com/script.js" data-site="{{ config('services.fathom_analytics.id') }}" defer>
     </script>
     @endif
+
+    @if (app()->environment('production'))
+    <script src="//d2wy8f7a9ursnm.cloudfront.net/v7/bugsnag.min.js">
+    </script>
+    <script>
+        Bugsnag.start({ apiKey: '6475c3116770ff30bc453a10b81f486f' })
+    </script>
+    @endif
 </head>
 
 <body class="h-full">
