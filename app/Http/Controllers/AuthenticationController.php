@@ -145,6 +145,10 @@ class AuthenticationController extends Controller
             ]);
         }
 
+        \Log::info($authenticatorAssertionResponse->getUserHandle());
+
+        \Log::info(session(self::CREDENTIAL_REQUEST_OPTIONS_SESSION_KEY));
+
         // Check the response from the device, this will
         // throw an exception if the response is invalid.
         // For the purposes of this demo, we are letting
