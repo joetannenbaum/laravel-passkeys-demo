@@ -12,7 +12,10 @@ class CredentialSourceRepository implements PublicKeyCredentialSourceRepository
 {
     public function findOneByCredentialId(string $publicKeyCredentialId): ?PublicKeyCredentialSource
     {
-        $authenticator = Authenticator::where('credential_id', base64_encode($publicKeyCredentialId))->first();
+        $authenticator = Authenticator::where(
+            'credential_id',
+            base64_encode($publicKeyCredentialId)
+        )->first();
 
         if (!$authenticator) {
             return null;
@@ -23,16 +26,23 @@ class CredentialSourceRepository implements PublicKeyCredentialSourceRepository
 
     public function findAllForUserEntity(PublicKeyCredentialUserEntity $publicKeyCredentialUserEntity): array
     {
-        return User::with('authenticators')->where('id', $publicKeyCredentialUserEntity->getId())->first()->authenticators->toArray();
+        return User::with('authenticators')
+            ->where('id', $publicKeyCredentialUserEntity->getId())
+            ->first()
+            ->authenticators
+            ->toArray();
     }
 
     public function saveCredentialSource(PublicKeyCredentialSource $publicKeyCredentialSource): void
     {
-        $user = User::where('id', $publicKeyCredentialSource->getUserHandle())->firstOrFail();
+        $user = User::where(
+            'id',
+            $publicKeyCredentialSource->getUserHandle()
+        )->firstOrFail();
 
         $user->authenticators()->save(new Authenticator([
             'credential_id' => $publicKeyCredentialSource->getPublicKeyCredentialId(),
-            'public_key' => $publicKeyCredentialSource->jsonSerialize(),
+            'public_key'    => $publicKeyCredentialSource->jsonSerialize(),
         ]));
     }
 }

@@ -11,6 +11,11 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    @if (config('services.fathom_analytics.id'))
+    <script src="https://cdn.usefathom.com/script.js" data-site="{{ config('services.fathom_analytics.id') }}" defer>
+    </script>
+    @endif
 </head>
 
 <body class="h-full">

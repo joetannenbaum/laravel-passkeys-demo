@@ -8,7 +8,6 @@ use Cose\Algorithms;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Psr\Http\Message\ServerRequestInterface;
 use Webauthn\AttestationStatement\AttestationObjectLoader;
@@ -41,9 +40,14 @@ class RegistrationController extends Controller
             'username' => $request->input('username'),
         ]);
 
-        if (!$user->exists) {
-            $user->save();
+        if ($user->exists) {
+            // We're in registration mode, they shouldn't be able to register a new device to an existing user
+            throw ValidationException::withMessages([
+                'username' => 'Username already exists',
+            ]);
         }
+
+        $user->save();
 
         $userEntity = PublicKeyCredentialUserEntity::create(
             $user->username,

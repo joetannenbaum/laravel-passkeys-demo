@@ -9,7 +9,6 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('authForm', () => ({
         mode: 'login',
         username: '',
-        name: '',
         browserSupported: browserSupportsWebAuthn(),
         error: null,
         submit() {
@@ -22,14 +21,22 @@ document.addEventListener('alpine:init', () => {
             return this.submitRegister();
         },
         submitRegister() {
+            this.trackEvent('register-start');
+
             window.axios
+                // Ask for the registration options
                 .post('/registration/options', {
                     username: this.username,
                 })
+                // Prompt the user to create a passkey
                 .then((response) => startRegistration(response.data))
+                // Verify the data with the server
                 .then((attResp) => axios.post('/registration/verify', attResp))
                 .then((verificationResponse) => {
                     if (verificationResponse.data?.verified) {
+                        // If we're good, reload the page and
+                        // the server will redirect us to the dashboard
+                        this.trackEvent('register-complete');
                         return window.location.reload();
                     }
 
@@ -41,16 +48,24 @@ document.addEventListener('alpine:init', () => {
                 });
         },
         submitLogin() {
+            this.trackEvent('login-start');
+
             window.axios
+                // Ask for the authentication options
                 .post('/authentication/options', {
                     username: this.username,
                 })
+                // Prompt the user to authenticate with their passkey
                 .then((response) => startAuthentication(response.data))
+                // Verify the data with the server
                 .then((attResp) =>
                     axios.post('/authentication/verify', attResp),
                 )
                 .then((verificationResponse) => {
+                    // If we're good, reload the page and
+                    // the server will redirect us to the dashboard
                     if (verificationResponse.data?.verified) {
+                        this.trackEvent('login-complete');
                         return window.location.reload();
                     }
 
@@ -68,6 +83,13 @@ document.addEventListener('alpine:init', () => {
 
                     this.error = error?.response?.data?.message || error;
                 });
+        },
+        trackEvent(eventId) {
+            if (typeof fathom === 'undefined') {
+                return;
+            }
+
+            fathom.trackGoal(eventId, 0);
         },
     }));
 });
