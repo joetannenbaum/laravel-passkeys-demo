@@ -21,7 +21,7 @@ document.addEventListener('alpine:init', () => {
             return this.submitRegister();
         },
         submitRegister() {
-            this.trackEvent('register-start');
+            this.trackEvent('D5MKGI4J');
 
             window.axios
                 // Ask for the registration options
@@ -36,7 +36,7 @@ document.addEventListener('alpine:init', () => {
                     if (verificationResponse.data?.verified) {
                         // If we're good, reload the page and
                         // the server will redirect us to the dashboard
-                        this.trackEvent('register-complete');
+                        this.trackEvent('ME74WQE4');
                         return window.location.reload();
                     }
 
@@ -48,7 +48,7 @@ document.addEventListener('alpine:init', () => {
                 });
         },
         submitLogin() {
-            this.trackEvent('login-start');
+            this.trackEvent('OHHWLXDF');
 
             window.axios
                 // Ask for the authentication options
@@ -65,7 +65,7 @@ document.addEventListener('alpine:init', () => {
                     // If we're good, reload the page and
                     // the server will redirect us to the dashboard
                     if (verificationResponse.data?.verified) {
-                        this.trackEvent('login-complete');
+                        this.trackEvent('D7T81ZST');
                         return window.location.reload();
                     }
 
@@ -85,8 +85,6 @@ document.addEventListener('alpine:init', () => {
                 });
         },
         trackEvent(eventId) {
-            console.log(eventId);
-            console.log('fathom', fathom);
             if (typeof fathom === 'undefined') {
                 return;
             }
