@@ -131,23 +131,15 @@ class AuthenticationController extends Controller
             AttestationObjectLoader::create($attestationManager)
         );
 
-        \Log::info($request->all());
-
         $publicKeyCredential = $pkCredentialLoader->load(json_encode($request->all()));
 
         $authenticatorAssertionResponse = $publicKeyCredential->getResponse();
-
-        \Log::info($authenticatorAssertionResponse->getClientDataJSON()->all());
 
         if (!$authenticatorAssertionResponse instanceof AuthenticatorAssertionResponse) {
             throw ValidationException::withMessages([
                 'username' => 'Invalid response type',
             ]);
         }
-
-        \Log::info($authenticatorAssertionResponse->getUserHandle());
-
-        \Log::info(session(self::CREDENTIAL_REQUEST_OPTIONS_SESSION_KEY));
 
         // Check the response from the device, this will
         // throw an exception if the response is invalid.
@@ -163,9 +155,6 @@ class AuthenticationController extends Controller
             $serverRequest,
             $authenticatorAssertionResponse->getUserHandle(),
         );
-
-        \Log::info($publicKeyCredentialSource->jsonSerialize());
-        \Log::info($publicKeyCredentialSource->getUserHandle());
 
         // If we've gotten this far, the response is valid!
 
