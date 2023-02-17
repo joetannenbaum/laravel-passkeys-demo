@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Auth\CredentialSourceRepository;
 use App\Models\User;
 use Cose\Algorithms;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -19,7 +18,6 @@ use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
-use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialParameters;
 use Webauthn\PublicKeyCredentialRpEntity;
@@ -38,23 +36,10 @@ class RegistrationController extends Controller
             null,
         );
 
-        $user = User::firstOrNew([
-            'username' => $request->input('username'),
-        ]);
-
-        if ($user->exists) {
-            // We're in registration mode, they shouldn't be able to register a new device to an existing user
-            throw ValidationException::withMessages([
-                'username' => 'Username already exists',
-            ]);
-        }
-
-        $user->save();
-
         $userEntity = PublicKeyCredentialUserEntity::create(
-            $user->username,
-            $user->id,
-            $user->username,
+            $request->input('username'),
+            $request->input('username'),
+            $request->input('username'),
             null,
         );
 
@@ -92,15 +77,7 @@ class RegistrationController extends Controller
             )
             ->setExtensions(AuthenticationExtensionsClientInputs::createFromArray([
                 'credProps' => true,
-            ]))
-            ->excludeCredentials(
-                ...$user->authenticators->map(
-                    fn ($authenticator) => PublicKeyCredentialDescriptor::create(
-                        PublicKeyCredentialDescriptor::CREDENTIAL_TYPE_PUBLIC_KEY,
-                        $authenticator->credential_id,
-                    )
-                )->toArray()
-            );
+            ]));
 
         $serializedOptions = $publicKeyCredentialCreationOptions->jsonSerialize();
 
@@ -112,8 +89,6 @@ class RegistrationController extends Controller
         $serializedOptions['extensions'] = $serializedOptions['extensions']->jsonSerialize();
 
         $serializedOptions['authenticatorSelection']['residentKey'] = AuthenticatorSelectionCriteria::RESIDENT_KEY_REQUIREMENT_PREFERRED;
-
-        // ray($serializedOptions);
 
         $request->session()->put(
             self::CREDENTIAL_CREATION_OPTIONS_SESSION_KEY,
@@ -169,14 +144,11 @@ class RegistrationController extends Controller
 
         $request->session()->forget(self::CREDENTIAL_CREATION_OPTIONS_SESSION_KEY);
 
-        try {
-            $publicKeyCredentialSourceRepository->saveCredentialSource($publicKeyCredentialSource);
-            $user = User::where('id', $publicKeyCredentialSource->getUserHandle())->firstOrFail();
-        } catch (ModelNotFoundException $e) {
-            throw ValidationException::withMessages([
-                'username' => 'User not found',
-            ]);
-        }
+        $user = User::create([
+            'username' => $publicKeyCredentialSource->getUserHandle(),
+        ]);
+
+        $publicKeyCredentialSourceRepository->saveCredentialSource($publicKeyCredentialSource);
 
         Auth::login($user);
 

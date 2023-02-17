@@ -141,7 +141,7 @@ class AuthenticationController extends Controller
 
         $request->session()->forget('publicKeyCredentialRequestOptions');
 
-        $user = User::where('id', $publicKeyCredentialSource->getUserHandle())->firstOrFail();
+        $user = User::where('username', $publicKeyCredentialSource->getUserHandle())->firstOrFail();
 
         Auth::login($user);
 

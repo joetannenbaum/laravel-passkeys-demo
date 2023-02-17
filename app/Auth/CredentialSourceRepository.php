@@ -36,7 +36,7 @@ class CredentialSourceRepository implements PublicKeyCredentialSourceRepository
     public function saveCredentialSource(PublicKeyCredentialSource $publicKeyCredentialSource): void
     {
         $user = User::where(
-            'id',
+            'username',
             $publicKeyCredentialSource->getUserHandle()
         )->firstOrFail();
 
