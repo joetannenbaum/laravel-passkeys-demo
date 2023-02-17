@@ -13,6 +13,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Webauthn\AttestationStatement\AttestationObjectLoader;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
+use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
@@ -87,6 +88,9 @@ class RegistrationController extends Controller
                 PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE
             )
             ->setAuthenticatorSelection(AuthenticatorSelectionCriteria::create())
+            ->setExtensions(AuthenticationExtensionsClientInputs::createFromArray([
+                'credProps' => true,
+            ]))
             ->excludeCredentials(
                 ...$user->authenticators->map(
                     fn ($authenticator) => PublicKeyCredentialDescriptor::create(
