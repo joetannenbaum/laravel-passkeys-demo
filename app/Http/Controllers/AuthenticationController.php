@@ -131,9 +131,13 @@ class AuthenticationController extends Controller
             AttestationObjectLoader::create($attestationManager)
         );
 
+        \Log::info($request->all());
+
         $publicKeyCredential = $pkCredentialLoader->load(json_encode($request->all()));
 
         $authenticatorAssertionResponse = $publicKeyCredential->getResponse();
+
+        \Log::info($authenticatorAssertionResponse->getClientDataJSON()->all());
 
         if (!$authenticatorAssertionResponse instanceof AuthenticatorAssertionResponse) {
             throw ValidationException::withMessages([
