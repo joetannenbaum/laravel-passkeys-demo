@@ -11,6 +11,15 @@
 
     <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml">
 
+    <meta property="og:image" content="{{ url('/passkeys-blog-header.png') }}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ url('/') }}" />
+    <meta property="og:title" content="Laravel Passkey Authentication Demo | Joe Codes" />
+    <meta property="og:description"
+        content="This is a demo of how to authenticate users in your Laravel app using a passkey." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:creator" content="@joetannenbaum" />
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
