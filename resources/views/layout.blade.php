@@ -12,6 +12,8 @@
     <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml">
 
     <meta property="og:image" content="{{ url('/passkeys-blog-header.png') }}" />
+    <meta property="og:image:width" content="3000" />
+    <meta property="og:image:height" content="2000" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="{{ url('/') }}" />
     <meta property="og:title" content="Laravel Passkey Authentication Demo | Joe Codes" />
