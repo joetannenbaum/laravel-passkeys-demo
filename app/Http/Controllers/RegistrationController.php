@@ -16,6 +16,7 @@ use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
+use Webauthn\AuthenticatorSelectionCriteria;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialLoader;
@@ -85,6 +86,7 @@ class RegistrationController extends Controller
             ->setAttestation(
                 PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE
             )
+            ->setAuthenticatorSelection(AuthenticatorSelectionCriteria::create())
             ->excludeCredentials(
                 ...$user->authenticators->map(
                     fn ($authenticator) => PublicKeyCredentialDescriptor::create(
