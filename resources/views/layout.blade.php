@@ -95,7 +95,8 @@
         @yield('content')
 
         <div class="absolute bottom-0 left-0 right-0 pb-4 mt-auto text-sm text-center text-gray-500">
-            <p>Launched with <a class="underline" target="_blank" href="https://bellows.dev">Bellows</a></p>
+            <p>Launched with <a class="underline" target="_blank"
+                    href="https://bellows.dev/?utm_source=laravelpasskeysdemo">Bellows</a></p>
         </div>
     </div>
 </body>
