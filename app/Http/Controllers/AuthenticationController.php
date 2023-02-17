@@ -156,6 +156,9 @@ class AuthenticationController extends Controller
             $authenticatorAssertionResponse->getUserHandle(),
         );
 
+        \Log::info($publicKeyCredentialSource->jsonSerialize());
+        \Log::info($publicKeyCredentialSource->getUserHandle());
+
         // If we've gotten this far, the response is valid!
 
         // We don't need the options anymore, so let's remove them from the session
